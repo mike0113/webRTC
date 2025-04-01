@@ -1,3 +1,14 @@
+# How to use it?
+
+- Git clone this `git clone git@github.com:mike0113/webRTC.git`
+- Change directory to `cd webRTC/step-05`
+- Setup your Web Server (setting file like "000-default-le-ssl.bak")
+- Run the program in "step-05", `npm install; node index.js`
+- Then open your browser, type the URL you set
+- You can communicate on it with another person.
+
+----
+
 # Realtime communication with WebRTC
 
 This code has the resources you need for the codelab [Realtime communication with WebRTC](https://codelabs.developers.google.com/codelabs/webrtc-web/#0).
