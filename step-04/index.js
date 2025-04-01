@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use strict';
 
 var os = require('os');
@@ -64,3 +65,71 @@ io.sockets.on('connection', function(socket) {
   });
 
 });
+=======
+'use strict';
+
+const os = require('os');
+const express = require('express');
+const http = require('http');
+const socketIO = require('socket.io');
+const path = require('path');
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIO(server);
+
+// ✅ 設定 Node.js 監聽 3000（與 Apache 反向代理一致）
+const PORT = 3005;
+
+// ✅ 提供 /webrtc 下的靜態檔案
+app.use("/webrtc", express.static(path.join(__dirname)));
+
+// ✅ WebSocket 事件
+io.on('connection', (socket) => {
+    console.log("A user connected");
+
+    socket.on('message', (message) => {
+        console.log("Client said: ", message);
+        socket.broadcast.emit('message', message);
+    });
+
+    socket.on('create or join', (room) => {
+        console.log(`Request to join room: ${room}`);
+        let clientsInRoom = io.sockets.adapter.rooms.get(room);
+        let numClients = clientsInRoom ? clientsInRoom.size : 0;
+
+        if (numClients === 0) {
+            socket.join(room);
+            socket.emit('created', room, socket.id);
+        } else if (numClients === 1) {
+            socket.join(room);
+            io.to(room).emit('join', room);
+            socket.emit('joined', room, socket.id);
+            io.to(room).emit('ready');
+        } else {
+            socket.emit('full', room);
+        }
+    });
+
+    socket.on('ipaddr', () => {
+        let ifaces = os.networkInterfaces();
+        for (let dev in ifaces) {
+            ifaces[dev].forEach((details) => {
+                if (details.family === 'IPv4' && details.address !== '127.0.0.1') {
+                    socket.emit('ipaddr', details.address);
+                }
+            });
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log("User disconnected");
+    });
+});
+
+// ✅ 啟動伺服器
+server.listen(PORT, () => {
+    console.log(`WebRTC server running at http://localhost:${PORT}/webrtc`);
+});
+
+>>>>>>> d5391ad (my version)
